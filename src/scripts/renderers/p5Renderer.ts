@@ -36,6 +36,9 @@ export default class P5Renderer implements BaseRenderer{
     x: number;
     y: number;
 
+    frameCount = 0;
+    totalFrames = 1000;
+
     constructor(w, h) {
 
         this.width = w;
@@ -61,9 +64,12 @@ export default class P5Renderer implements BaseRenderer{
 
     protected draw(s) {
         if (this.animating) { 
-            this.delta += 1;
+            this.frameCount += 3;
+
+            let frameDelta = 2 * Math.PI * (this.frameCount % this.totalFrames) / this.totalFrames;
+
             s.colorMode(s.RGB);
-            s.background(0, 0, 0, 10);
+            s.background(0, 0, 0, 255);
             s.colorMode(s.HSB);
 
             let numpoints = 200;
@@ -74,19 +80,19 @@ export default class P5Renderer implements BaseRenderer{
             for (let j = 0; j < numpoints; j++) {
                 let angle = 2 * Math.PI * j / numpoints;
 
-                let rx = radiusX + Math.sin(this.delta / 50) * ((j % 4) * 10);
-                let ry = radiusY + Math.sin(this.delta / 50) * ((j % 4) * 10);
+                let rx = radiusX + Math.sin(frameDelta) * ((j % 4) * 20);
+                let ry = radiusY + Math.sin(frameDelta) * ((j % 4) * 20);
                 let x = centerX + Math.sin(angle) * rx;
                 let y = centerY + Math.cos(angle) * ry;
 
                 s.circle(x, y, 3);
-                let hue = (this.delta + (j / numpoints) * 360) % 360;
+                let hue = (frameDelta + (j / numpoints) * 360) % 360;
                 s.fill(hue, 255, 255, 255);
                 s.stroke(hue, 255, 255, 255);
             }
 
             if (this.recording) {
-                if (this.delta === (360 * 2)) {
+                if (frameDelta == 0) {
                     this.completeCallback();
                 }
             }
@@ -98,9 +104,10 @@ export default class P5Renderer implements BaseRenderer{
     }
 
     public play() {
-        this.delta = 0;
+        this.frameCount = 0;
         this.recording = true;
         this.animating = true;
+        this.s.background(0, 0, 0, 255);
     }
 
     public stop() {
